@@ -13,6 +13,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>7.20.1</cucumber.version>
+        <spring.version>6.2.19</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -44,6 +45,24 @@
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
             <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

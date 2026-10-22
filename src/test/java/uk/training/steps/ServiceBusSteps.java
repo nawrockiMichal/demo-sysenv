@@ -1,6 +1,5 @@
 package uk.training.steps;
 
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -10,27 +9,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServiceBusSteps {
 
-    private ServiceBusUtil serviceBus;
+    private final ServiceBusUtil serviceBus;
+    private String queueName;
     private String messageId;
 
-    @Given("a Service Bus queue is available")
-    public void aServiceBusQueueIsAvailable() {
-        serviceBus = new ServiceBusUtil();
+    public ServiceBusSteps(ServiceBusUtil serviceBus) {
+        this.serviceBus = serviceBus;
+    }
+
+    @Given("the Service Bus queue {string}")
+    public void theServiceBusQueue(String queueName) {
+        this.queueName = queueName;
     }
 
     @When("I send the message {string}")
     public void iSendTheMessage(String body) {
-        messageId = serviceBus.sendMessage(body);
+        messageId = serviceBus.sendMessage(queueName, body);
     }
 
     @Then("the message {string} can be received from the queue")
     public void theMessageCanBeReceived(String expectedBody) {
-        assertEquals(expectedBody, serviceBus.receiveMessageBody(messageId),
+        assertEquals(expectedBody, serviceBus.receiveMessageBody(queueName, messageId),
                 "Message " + messageId + " was not received");
-    }
-
-    @After
-    public void closeServiceBus() {
-        if (serviceBus != null) serviceBus.close();
     }
 }
