@@ -7,17 +7,24 @@ import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.Properties;
 import java.util.UUID;
 
 public class ServiceBusUtil implements AutoCloseable {
+
+    private static final String PROPERTIES_FILE = "/servicebus.properties";
 
     private final ServiceBusSenderClient sender;
     private final ServiceBusReceiverClient receiver;
 
     public ServiceBusUtil() {
-        String connectionString = requiredEnv("SERVICEBUS_CONNECTION_STRING");
-        String queueName = requiredEnv("SERVICEBUS_QUEUE_NAME");
+        Properties properties = loadProperties();
+        String connectionString = requiredProperty(properties, "servicebus.connection-string");
+        String queueName = requiredProperty(properties, "servicebus.queue-name");
 
         sender = new ServiceBusClientBuilder()
                 .connectionString(connectionString)
@@ -58,10 +65,23 @@ public class ServiceBusUtil implements AutoCloseable {
         receiver.close();
     }
 
-    private static String requiredEnv(String name) {
-        String value = System.getenv(name);
+    private static Properties loadProperties() {
+        try (InputStream in = ServiceBusUtil.class.getResourceAsStream(PROPERTIES_FILE)) {
+            if (in == null) {
+                throw new IllegalStateException(PROPERTIES_FILE + " not found on the classpath");
+            }
+            Properties properties = new Properties();
+            properties.load(in);
+            return properties;
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not read " + PROPERTIES_FILE, e);
+        }
+    }
+
+    private static String requiredProperty(Properties properties, String name) {
+        String value = properties.getProperty(name);
         if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Environment variable " + name + " is not set");
+            throw new IllegalStateException("Property " + name + " is not set in " + PROPERTIES_FILE);
         }
         return value;
     }
